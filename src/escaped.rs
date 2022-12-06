@@ -6,13 +6,17 @@ pub struct Escaped<'a> {
 
 impl<'a, T: AsRef<[u8]> + ?Sized> From<&'a T> for Escaped<'a> {
     fn from(value: &'a T) -> Self {
-        Self { bytes: value.as_ref() }
+        Self {
+            bytes: value.as_ref(),
+        }
     }
 }
 
 impl<'a, T: AsRef<[u8]>> From<Option<&'a T>> for Escaped<'a> {
     fn from(value: Option<&'a T>) -> Self {
-        Self { bytes: value.map(AsRef::as_ref).unwrap_or(&[]) }
+        Self {
+            bytes: value.map(AsRef::as_ref).unwrap_or(&[]),
+        }
     }
 }
 

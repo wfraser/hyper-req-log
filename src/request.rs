@@ -1,10 +1,11 @@
-use std::time::Instant;
-use std::net::SocketAddr;
-use std::fmt::{Display, Formatter, self, Write};
+use std::fmt::{self, Display, Formatter, Write};
 use std::io;
+use std::net::SocketAddr;
+use std::time::Instant;
 
+use hyper::header::{HOST, REFERER, USER_AGENT};
+use hyper::http::{HeaderValue, Method, Request, Uri, Version};
 use hyper::Response;
-use hyper::{Method, Request, Uri, Version, http::HeaderValue, header::{HOST, USER_AGENT, REFERER}};
 
 use crate::escaped::Escaped;
 
@@ -107,7 +108,9 @@ impl<A: Display> Display for LogRequest<A> {
             write!(f, "{}", Escaped::from(fwd))?;
         }
 
-        write!(f, " {host} {method} {uri} {version:?} {agent} {referer} {duration:?}",
+        write!(
+            f,
+            " {host} {method} {uri} {version:?} {agent} {referer} {duration:?}",
             host = Escaped::from(self.host.as_ref()),
             method = self.method,
             uri = self.uri,
