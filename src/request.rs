@@ -14,6 +14,7 @@ use crate::escaped::Escaped;
 ///
 /// The `A` type parameter is the type of the `action` field, whose `Display`
 /// representation is used when logging.
+#[derive(Debug)]
 pub struct LogRequest<A: Display> {
     start_time: Instant,
     logged: bool,
