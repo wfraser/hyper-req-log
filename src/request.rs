@@ -73,6 +73,11 @@ impl<A: Display> LogRequest<A> {
     fn internal_write<W: io::Write>(&self, mut write: W) -> io::Result<()> {
         write!(write, "{self}")
     }
+
+    /// Discard the instance without logging anything.
+    pub fn discard(mut self) {
+        self.logged = true;
+    }
 }
 
 impl<A: Display> Display for LogRequest<A> {
