@@ -139,7 +139,7 @@ impl<A: Display> Display for LogRequest<A> {
             write!(f, "{}", Escaped::from(fwd))?;
         }
 
-        write!(
+        writeln!(
             f,
             " {host} {method} {uri} {version:?} {agent} {referer} {duration:?}",
             host = Escaped::from(self.host.as_ref()),
