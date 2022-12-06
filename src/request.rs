@@ -12,7 +12,7 @@ use crate::escaped::Escaped;
 /// [LogRequest] is a container for information about a HTTP request which
 /// writes a log entry when dropped.
 ///
-/// The `A` type parameter is the type of the `action` field, whose `Debug`
+/// The `A` type parameter is the type of the `action` field, whose `Display`
 /// representation is used when logging.
 pub struct LogRequest<A: Display> {
     start_time: Instant,
@@ -70,7 +70,7 @@ impl<A: Display> LogRequest<A> {
     }
 
     /// Set an action value for the request. This is intended to identify the
-    /// part of the application which handled the request, and its Debug
+    /// part of the application which handled the request, and its Display
     /// representation is printed in the log.
     pub fn set_action(&mut self, action: A) -> &mut Self {
         self.action = Some(action);
