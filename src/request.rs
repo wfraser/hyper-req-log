@@ -44,6 +44,11 @@ impl<A: Display> LogRequest<A> {
         }
     }
 
+    pub fn set_remote(&mut self, remote: SocketAddr) -> &mut Self {
+        self.remote = Some(remote);
+        self
+    }
+
     pub fn set_user(&mut self, user: String) -> &mut Self {
         self.user = Some(user);
         self
