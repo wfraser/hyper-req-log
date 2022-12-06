@@ -9,6 +9,11 @@ use hyper::Response;
 
 use crate::escaped::Escaped;
 
+/// [LogRequest] is a container for information about a HTTP request which
+/// writes a log entry when dropped.
+///
+/// The `A` type parameter is the type of the `action` field, whose `Debug`
+/// representation is used when logging.
 pub struct LogRequest<A: Display> {
     start_time: Instant,
     logged: bool,
@@ -26,6 +31,10 @@ pub struct LogRequest<A: Display> {
 }
 
 impl<A: Display> LogRequest<A> {
+    /// Create a new [LogRequest] instance from the given Hyper [Request].
+    /// The request will be logged to stderr when the instance is dropped
+    /// unless [write](Self::write) or [discard](Self::discard) are called
+    /// first.
     pub fn from_request<B>(req: &Request<B>) -> Self {
         Self {
             start_time: Instant::now(),
@@ -44,27 +53,40 @@ impl<A: Display> LogRequest<A> {
         }
     }
 
+    /// Set the address of the remote endpoint.
+    ///
+    /// If a `X-Forwarded-For` header is present in the response, it will be
+    /// appended to this value, following a colon.
     pub fn set_remote(&mut self, remote: SocketAddr) -> &mut Self {
         self.remote = Some(remote);
         self
     }
 
+    /// Set a user identifier for the request. This can be any arbitrary
+    /// string, and will be escaped if necessary.
     pub fn set_user(&mut self, user: String) -> &mut Self {
         self.user = Some(user);
         self
     }
 
+    /// Set an action value for the request. This is intended to identify the
+    /// part of the application which handled the request, and its Debug
+    /// representation is printed in the log.
     pub fn set_action(&mut self, action: A) -> &mut Self {
         self.action = Some(action);
         self
     }
 
+    /// Take information from the response to the request.
+    ///
+    /// Currently only the HTTP status is extracted.
     pub fn set_response<B>(&mut self, response: &Response<B>) -> &mut Self {
         self.status = Some(response.status().as_u16());
         // TODO: response content length?
         self
     }
 
+    /// Write the log entry to the given stream.
     pub fn write<W: io::Write>(mut self, write: W) -> io::Result<()> {
         self.logged = true;
         self.internal_write(write)
