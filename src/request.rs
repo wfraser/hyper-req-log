@@ -93,8 +93,7 @@ impl<A: Display> Display for LogRequest<A> {
         }
         f.write_str("] ")?;
         if let Some(user) = &self.user {
-            f.write_str(user)?;
-            f.write_char(' ')?;
+            write!(f, "{} ", Escaped::from(user))?;
         }
 
         match self.remote {
