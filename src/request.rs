@@ -7,6 +7,7 @@ use hyper::header::{HOST, REFERER, USER_AGENT};
 use hyper::http::{HeaderValue, Method, Request, Uri, Version};
 use hyper::Response;
 
+use crate::display::LogDisplay;
 use crate::escaped::Escaped;
 
 /// [LogRequest] is a container for information about a HTTP request which
@@ -15,7 +16,7 @@ use crate::escaped::Escaped;
 /// The `A` type parameter is the type of the `action` field, whose `Display`
 /// representation is used when logging.
 #[derive(Debug)]
-pub struct LogRequest<A: Display> {
+pub struct LogRequest<A: LogDisplay> {
     start_time: Instant,
     logged: bool,
     user: Option<String>,
@@ -31,7 +32,7 @@ pub struct LogRequest<A: Display> {
     status: Option<u16>,
 }
 
-impl<A: Display> LogRequest<A> {
+impl<A: LogDisplay> LogRequest<A> {
     /// Create a new [LogRequest] instance from the given Hyper [Request].
     /// The request will be logged to stderr when the instance is dropped
     /// unless [write](Self::write) or [discard](Self::discard) are called
@@ -71,8 +72,8 @@ impl<A: Display> LogRequest<A> {
     }
 
     /// Set an action value for the request. This is intended to identify the
-    /// part of the application which handled the request, and its Display
-    /// representation is printed in the log.
+    /// part of the application which handled the request, and its LogDisplay
+    /// representation (defaults to Debug) is printed in the log.
     pub fn set_action(&mut self, action: A) -> &mut Self {
         self.action = Some(action);
         self
@@ -103,11 +104,12 @@ impl<A: Display> LogRequest<A> {
     }
 }
 
-impl<A: Display> Display for LogRequest<A> {
+impl<A: LogDisplay> Display for LogRequest<A> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str("request: [")?;
         if let Some(act) = &self.action {
-            write!(f, "{act}:")?;
+            LogDisplay::fmt(act, f)?;
+            f.write_char(':')?;
         }
         if let Some(status) = self.status {
             write!(f, "{status}")?;
@@ -156,7 +158,7 @@ impl<A: Display> Display for LogRequest<A> {
     }
 }
 
-impl<A: Display> Drop for LogRequest<A> {
+impl<A: LogDisplay> Drop for LogRequest<A> {
     fn drop(&mut self) {
         if !self.logged {
             let _ = self.internal_write(std::io::stderr().lock());
