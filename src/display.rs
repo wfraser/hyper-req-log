@@ -6,3 +6,9 @@ pub trait LogDisplay: Debug {
         <Self as Debug>::fmt(self, f)
     }
 }
+
+impl<'a> LogDisplay for &'a str {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self)
+    }
+}
